@@ -37,6 +37,8 @@ from .fast64_internal.render_settings import (
     on_update_render_settings,
 )
 
+from .fast64_internal.coop.coop import f3d_coop_register, f3d_coop_unregister
+
 # info about add on
 bl_info = {
     "name": "Fast64",
@@ -461,6 +463,8 @@ def register():
     f3d_parser_register()
     op_largetexture_register()
 
+    f3d_coop_register()
+
     # ROM
 
     bpy.types.Scene.decomp_compatible = bpy.props.BoolProperty(name="Decomp Compatibility", default=True)
@@ -498,6 +502,8 @@ def unregister():
     bsdf_conv_unregister()
     bsdf_conv_panel_unregsiter()
     render_engine_unregister()
+
+    f3d_coop_unregister()
 
     del bpy.types.Scene.fullTraceback
     del bpy.types.Scene.decomp_compatible

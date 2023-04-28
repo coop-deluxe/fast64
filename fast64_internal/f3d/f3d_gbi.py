@@ -323,6 +323,7 @@ class F3D:
             self.G_CULL_BOTH = 0x00003000  # To make code cleaner
         self.G_FOG = 0x00010000
         self.G_LIGHTING = 0x00020000
+        self.G_LIGHT_MAP_EXT = 0x00000800
         self.G_TEXTURE_GEN = 0x00040000
         self.G_TEXTURE_GEN_LINEAR = 0x00080000
         self.G_LOD = 0x00100000  # NOT IMPLEMENTED
@@ -334,6 +335,7 @@ class F3D:
         # if _LANGUAGE_ASSEMBLY:
         self.G_FOG_H = self.G_FOG / 0x10000
         self.G_LIGHTING_H = self.G_LIGHTING / 0x10000
+        self.G_LIGHT_MAP_EXT_H = self.G_LIGHT_MAP_EXT / 0x10000
         self.G_TEXTURE_GEN_H = self.G_TEXTURE_GEN / 0x10000
         self.G_TEXTURE_GEN_LINEAR_H = self.G_TEXTURE_GEN_LINEAR / 0x10000
         self.G_LOD_H = self.G_LOD / 0x10000  # NOT IMPLEMENTED
@@ -3929,6 +3931,8 @@ def geoFlagListToWord(flagList, f3d):
             word += f3d.G_FOG
         elif name == "G_LIGHTING":
             word += f3d.G_LIGHTING
+        elif name == "G_LIGHT_MAP_EXT":
+            word += f3d.G_LIGHT_MAP_EXT
         elif name == "G_TEXTURE_GEN":
             word += f3d.G_TEXTURE_GEN
         elif name == "G_TEXTURE_GEN_LINEAR":

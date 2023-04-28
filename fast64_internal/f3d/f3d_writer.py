@@ -1125,6 +1125,14 @@ def is3_2_or_above():
 
 def getLoopColor(loop: bpy.types.MeshLoop, mesh, mat_ver):
 
+    color_layer = getColorLayer(mesh, layer="UVColors")
+    if color_layer is not None:
+        normalizedRGB = color_layer[loop.index].color
+        if is3_2_or_above():
+            normalizedRGB = gammaCorrect(normalizedRGB)
+
+        return mathutils.Vector((normalizedRGB[0], normalizedRGB[1], normalizedRGB[2], color_layer[loop.index].color[3]))
+
     color_layer = getColorLayer(mesh, layer="Col")
     alpha_layer = getColorLayer(mesh, layer="Alpha")
 
@@ -1391,7 +1399,7 @@ def saveOrGetF3DMaterial(material, fModel, obj, drawLayer, convertTextureData):
 
     # Checking for f3dMat.rdp_settings.g_lighting here will prevent accidental exports,
     # There may be some edge case where this isn't desired.
-    if useDict["Shade"] and f3dMat.set_lights and f3dMat.rdp_settings.g_lighting:
+    if useDict["Shade"] and f3dMat.set_lights and (f3dMat.rdp_settings.g_lighting or f3dMat.rdp_settings.g_light_map):
         fLights = saveLightsDefinition(fModel, fMaterial, f3dMat, materialName + "_lights")
         fMaterial.mat_only_DL.commands.extend([SPSetLights(fLights)])  # TODO: handle synching: NO NEED?
 
@@ -1522,6 +1530,7 @@ def saveGeoModeDefinitionF3DEX2(fMaterial, settings, defaults, matWriteMethod):
     saveBitGeoF3DEX2(settings.g_cull_back, defaults.g_cull_back, "G_CULL_BACK", geo, matWriteMethod)
     saveBitGeoF3DEX2(settings.g_fog, defaults.g_fog, "G_FOG", geo, matWriteMethod)
     saveBitGeoF3DEX2(settings.g_lighting, defaults.g_lighting, "G_LIGHTING", geo, matWriteMethod)
+    saveBitGeoF3DEX2(settings.g_light_map, defaults.g_light_map, "G_LIGHT_MAP_EXT", geo, matWriteMethod)
 
     # make sure normals are saved correctly.
     saveBitGeoF3DEX2(settings.g_tex_gen, defaults.g_tex_gen, "G_TEXTURE_GEN", geo, matWriteMethod)
@@ -1560,6 +1569,7 @@ def saveGeoModeDefinition(fMaterial, settings, defaults, matWriteMethod):
     saveBitGeo(settings.g_cull_back, defaults.g_cull_back, "G_CULL_BACK", setGeo, clearGeo, matWriteMethod)
     saveBitGeo(settings.g_fog, defaults.g_fog, "G_FOG", setGeo, clearGeo, matWriteMethod)
     saveBitGeo(settings.g_lighting, defaults.g_lighting, "G_LIGHTING", setGeo, clearGeo, matWriteMethod)
+    saveBitGeo(settings.g_light_map, defaults.g_light_map, "G_LIGHT_MAP_EXT", setGeo, clearGeo, matWriteMethod)
 
     # make sure normals are saved correctly.
     saveBitGeo(settings.g_tex_gen, defaults.g_tex_gen, "G_TEXTURE_GEN", setGeo, clearGeo, matWriteMethod)

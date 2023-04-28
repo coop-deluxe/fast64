@@ -236,6 +236,8 @@ def isTexturePointSampled(material):
 
 def isLightingDisabled(material):
     f3dMat = material.f3d_mat
+    if f3dMat.rdp_settings.g_light_map:
+        return True
     return not f3dMat.rdp_settings.g_lighting
 
 
@@ -413,6 +415,7 @@ def ui_geo_mode(settings, dataHolder, layout, useDropdown):
         inputGroup.prop(settings, "g_tex_gen", text="Texture UV Generate")
         inputGroup.prop(settings, "g_tex_gen_linear", text="Texture UV Generate Linear")
         inputGroup.prop(settings, "g_shade_smooth", text="Smooth Shading")
+        inputGroup.prop(settings, "g_light_map", text="Light Map")
         if bpy.context.scene.f3d_type == "F3DEX_GBI_2" or bpy.context.scene.f3d_type == "F3DEX_GBI":
             inputGroup.prop(settings, "g_clipping", text="Clipping")
 
@@ -2585,6 +2588,12 @@ class RDPSettings(bpy.types.PropertyGroup):
         update=update_node_values_with_preset,
         description="Shades primitive smoothly using interpolation between shade values for each vertex (Gouraud shading)"
     )
+    g_light_map: bpy.props.BoolProperty(
+        name="Light Map",
+        default=False,
+        update=update_node_values_with_preset,
+        description="Uses vertex colors as a light map"
+    )
     # f3dlx2 only
     g_clipping: bpy.props.BoolProperty(
         name="Clipping",
@@ -2837,6 +2846,7 @@ class RDPSettings(bpy.types.PropertyGroup):
             self.g_tex_gen,
             self.g_tex_gen_linear,
             self.g_shade_smooth,
+            self.g_light_map,
             self.g_clipping,
             self.g_mdsft_alpha_dither,
             self.g_mdsft_rgb_dither,
