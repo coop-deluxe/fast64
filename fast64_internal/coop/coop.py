@@ -2,13 +2,12 @@ from typing import Union
 import bmesh, bpy, mathutils, re, math, traceback
 from bpy.utils import register_class, unregister_class
 from ..utility import *
+from ..f3d_material_converter import convertAllBSDFtoF3D
+from bpy.types import Scene, Image
 import ast
 import struct
 
-def create_uv(uv_name):
-    # Get the selected object
-    obj = bpy.context.active_object
-
+def create_uv(obj, uv_name):
     # Create the UV
     uv_map = obj.data.uv_layers.new(name=uv_name)
 
@@ -33,19 +32,13 @@ def create_uv(uv_name):
 
     return uv_map
 
-def create_col(col_name):
-    # Get the selected object
-    obj = bpy.context.active_object
-
+def create_col(obj, col_name):
     # Create the col
     col = obj.data.vertex_colors.new(name=col_name)
 
     return col
 
-def convert_uv_to_col(uv_map, col):
-    # Get the active object
-    obj = bpy.context.active_object
-
+def convert_uv_to_col(obj, uv_map, col):
     # Get the active mesh
     mesh = obj.data
 
@@ -62,35 +55,74 @@ def convert_uv_to_col(uv_map, col):
             a = ((v >> 8) & 0xFF) / 255.0
             color = (r, g, b, a)  # Set the color based on the UV coordinates
             col.data[loop_index].color = color
-            print('color: ' + str(uv_coords[1]) + " :: " + str(color[3]) + " :: " + str(int(b * 255)) + ", " + str(int(a * 255)))
+            #print('color: ' + str(uv_coords[1]) + " :: " + str(color[3]) + " :: " + str(int(b * 255)) + ", " + str(int(a * 255)))
 
     # Update the mesh to reflect the changes
     mesh.update()
 
 def convert_for_lightmap():
-    # Get the selected object
-    obj = bpy.context.active_object
+    # check object mode
+    if bpy.context.mode != "OBJECT":
+        raise PluginError("Operator can only be used in object mode.")
 
-    # Switch to object mode
-    bpy.ops.object.mode_set(mode='OBJECT')
+    # check for selection
+    if len(bpy.context.selected_objects) == 0:
+        raise PluginError("Mesh not selected.")
+    elif type(bpy.context.selected_objects[0].data) is not bpy.types.Mesh:
+        raise PluginError("Mesh not selected.")
+
+    # hide the selected object
+    original_obj = bpy.context.active_object
+
+    # Duplicate the selected object
+    obj = original_obj.copy()
+    obj.data = original_obj.data.copy()
+    obj.animation_data_clear()
+    bpy.context.collection.objects.link(obj)
+    obj.name = obj.name + '_mapped'
+    obj.select_set(True)
+    original_obj.hide_set(True)
 
     # create the uv map if it doesn't exist
     uv_map = None
-    uv_name = 'SimpleBake'
-    if uv_name not in obj.data.uv_layers:
-        uv_map = create_uv(uv_name)
+    uv_map_name = None
+    if len(obj.data.uv_layers) < 1:
+        raise PluginError("No regular UV map.")
+    elif len(obj.data.uv_layers) < 2:
+        uv_map = create_uv(obj, 'Lightmap')
     else:
-        uv_map = obj.data.uv_layers[uv_name]
+        uv_map = obj.data.uv_layers[1]
+
+    # error check
+    if uv_map is None:
+        raise PluginError("Could not generate or find second uv map.")
+    uv_map_name = uv_map.name
 
     # create the col if it doesn't exist
     col = None
     col_name = 'UVColors'
     if col_name not in obj.data.vertex_colors:
-        col = create_col(col_name)
+        col = create_col(obj, col_name)
     else:
         col = obj.data.vertex_colors[col_name]
 
-    convert_uv_to_col(uv_map, col)
+    # error check
+    if col is None:
+        raise PluginError("Could not generate or find vertex colors.")
+
+    # convert the UV map to vertex colors
+    convert_uv_to_col(obj, obj.data.uv_layers[uv_map_name], col)
+
+    # build up lightmap info
+    lightmap_info = {
+        'uv': uv_map_name,
+        'tex': bpy.context.scene.get("CoopLightmapImage")
+    }
+    # convert the materials to F3D
+    convertAllBSDFtoF3D([obj], False, lightmap_info = lightmap_info)
+
+    # inject the uv map into the F3D material
+
 
 class F3D_Coop(bpy.types.Operator):
     # set bl_ properties
@@ -107,7 +139,7 @@ class F3D_Coop(bpy.types.Operator):
 
         try:
             convert_for_lightmap()
-            
+
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}
 
@@ -131,10 +163,8 @@ class F3D_CoopPanel(bpy.types.Panel):
     # called every frame
     def draw(self, context):
         col = self.layout.column()
-
+        prop_split(col, context.scene, "CoopLightmapImage", "Lightmap Image")
         col.operator(F3D_Coop.bl_idname)
-        prop_split(col, context.scene, "CoopUVName", "UV Name")
-        prop_split(col, context.scene, "CoopVtxColName", "Vtx Color Name")
 
 f3d_coop_classes = (
     F3D_Coop,
@@ -145,13 +175,11 @@ def f3d_coop_register():
     for cls in f3d_coop_classes:
         register_class(cls)
 
-    bpy.types.Scene.CoopUVName = bpy.props.StringProperty(name="UVName")
-    bpy.types.Scene.CoopVtxColName = bpy.props.StringProperty(name="VtxColName")
+    bpy.types.Scene.CoopLightmapImage = bpy.props.PointerProperty(name="LightmapImage", type=Image)
 
 
 def f3d_coop_unregister():
     for cls in reversed(f3d_coop_classes):
         unregister_class(cls)
 
-    del bpy.types.Scene.CoopUVName
-    del bpy.types.Scene.CoopVtxColName
+    del bpy.types.Scene.CoopLightmapImage
