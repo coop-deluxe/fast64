@@ -195,7 +195,7 @@ def convertAllBSDFtoF3D(objs, renameUV, lightmap_info = None):
 
 def convertBSDFtoF3D(obj, index, material, materialDict, lightmap_info = None):
     if not material.use_nodes:
-        newMaterial = createF3DMat(obj, preset="Shaded Solid", index=index)
+        newMaterial = createF3DMat(obj, preset="Shaded Solid", index=index, lightmap=(lightmap_info != None))
         f3dMat = newMaterial.f3d_mat if newMaterial.mat_ver > 3 else newMaterial
         f3dMat.default_light_color = material.diffuse_color
         updateMatWithName(newMaterial, material, materialDict)
@@ -204,7 +204,7 @@ def convertBSDFtoF3D(obj, index, material, materialDict, lightmap_info = None):
         tex0Node = material.node_tree.nodes["Principled BSDF"].inputs["Base Color"]
         tex1Node = material.node_tree.nodes["Principled BSDF"].inputs["Subsurface Color"]
         if len(tex0Node.links) == 0:
-            newMaterial = createF3DMat(obj, preset=getDefaultMaterialPreset("Shaded Solid"), index=index)
+            newMaterial = createF3DMat(obj, preset=getDefaultMaterialPreset("Shaded Solid"), index=index, lightmap=(lightmap_info != None))
             f3dMat = newMaterial.f3d_mat if newMaterial.mat_ver > 3 else newMaterial
             f3dMat.default_light_color = tex0Node.default_value
             updateMatWithName(newMaterial, material, materialDict)
@@ -225,7 +225,7 @@ def convertBSDFtoF3D(obj, index, material, materialDict, lightmap_info = None):
                     presetName = getDefaultMaterialPreset("sm64_lightmap_texture")
                 else:
                     presetName = getDefaultMaterialPreset("Shaded Texture")
-                newMaterial = createF3DMat(obj, preset=presetName, index=index)
+                newMaterial = createF3DMat(obj, preset=presetName, index=index, lightmap=(lightmap_info != None))
                 f3dMat = newMaterial.f3d_mat if newMaterial.mat_ver > 3 else newMaterial
                 f3dMat.tex0.tex = tex0Node.links[0].from_node.image
 
@@ -237,14 +237,7 @@ def convertBSDFtoF3D(obj, index, material, materialDict, lightmap_info = None):
                 updateMatWithName(newMaterial, material, materialDict)
 
                 if lightmap_info != None:
-                    uv2 = newMaterial.node_tree.nodes.new('ShaderNodeUVMap')
-                    uv2.uv_map = lightmap_info['uv']
-                    uv2.location = (80,130)
-
-                    newMaterial.node_tree.links.new(newMaterial.node_tree.nodes.get('Tex1_1').inputs[0], uv2.outputs[0])
-                    newMaterial.node_tree.links.new(newMaterial.node_tree.nodes.get('Tex1_2').inputs[0], uv2.outputs[0])
-                    newMaterial.node_tree.links.new(newMaterial.node_tree.nodes.get('Tex1_3').inputs[0], uv2.outputs[0])
-                    newMaterial.node_tree.links.new(newMaterial.node_tree.nodes.get('Tex1_4').inputs[0], uv2.outputs[0])
+                    newMaterial.node_tree.nodes["LightmapUV"].uv_map = lightmap_info['uv']
             else:
                 print("Principled BSDF material does not have an Image Node attached to its Base Color.")
     else:

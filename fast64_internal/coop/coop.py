@@ -7,6 +7,42 @@ from bpy.types import Scene, Image
 import ast
 import struct
 
+def gamma_correct_value(val):
+    return 1.055 * pow(val, (1/2.4)) - 0.055
+
+def combine_lightmaps(lm_image, ao_image, ao_strength):
+    width = lm_image.size[0]
+    height = lm_image.size[1]
+    combined_name = "lightmap"
+
+    # remove previous gamma corrected image
+    for i in bpy.data.images:
+        if i.name == combined_name:
+            i.user_clear()
+            bpy.data.images.remove(i)
+
+    # create gamma corrected image
+    combined = bpy.data.images.new(combined_name, width, height)
+    combined_pixels = list(lm_image.pixels)
+    if ao_image is not None:
+        ao_pixels = ao_image.pixels[:] # create a copy (tuple) for read-only access
+    for x in range(width):
+        for y in range(height):
+            offs = (x + int(y * width)) * 4
+            for i in range(3):
+                if ao_image is not None:
+                    val = (ao_pixels[offs + i] * combined_pixels[offs + i]) * ao_strength
+                    val += combined_pixels[offs + i] * (1 - ao_strength)
+                else:
+                    val = combined_pixels[offs + i]
+                combined_pixels[offs + i] = gamma_correct_value(val)
+
+    combined.pixels[:] = combined_pixels
+    combined.update()
+    combined.pack()
+
+    return combined
+
 def create_uv(obj, uv_name):
     # Create the UV
     uv_map = obj.data.uv_layers.new(name=uv_name)
@@ -61,6 +97,8 @@ def convert_uv_to_col(obj, uv_map, col):
     mesh.update()
 
 def convert_for_lightmap():
+    lightmap = combine_lightmaps(bpy.context.scene.get("CoopLMImage"), bpy.context.scene.get("CoopAOImage"), bpy.context.scene.CoopAOStrength)
+
     # check object mode
     if bpy.context.mode != "OBJECT":
         raise PluginError("Operator can only be used in object mode.")
@@ -116,18 +154,17 @@ def convert_for_lightmap():
     # build up lightmap info
     lightmap_info = {
         'uv': uv_map_name,
-        'tex': bpy.context.scene.get("CoopLightmapImage")
+        'tex': lightmap
     }
     # convert the materials to F3D
     convertAllBSDFtoF3D([obj], False, lightmap_info = lightmap_info)
-
     # inject the uv map into the F3D material
 
 
 class F3D_Coop(bpy.types.Operator):
     # set bl_ properties
     bl_idname = "object.f3d_convert_uvs"
-    bl_label = "Convert UVs"
+    bl_label = "Apply Lightmap"
     bl_options = {"REGISTER", "UNDO", "PRESET"}
 
     # Called on demand (i.e. button press, menu item)
@@ -163,7 +200,9 @@ class F3D_CoopPanel(bpy.types.Panel):
     # called every frame
     def draw(self, context):
         col = self.layout.column()
-        prop_split(col, context.scene, "CoopLightmapImage", "Lightmap Image")
+        prop_split(col, context.scene, "CoopLMImage", "Lightmap Image")
+        prop_split(col, context.scene, "CoopAOImage", "Ambient Occlusion Image")
+        prop_split(col, context.scene, "CoopAOStrength", "Ambient Occlusion Strength")
         col.operator(F3D_Coop.bl_idname)
 
 f3d_coop_classes = (
@@ -175,11 +214,15 @@ def f3d_coop_register():
     for cls in f3d_coop_classes:
         register_class(cls)
 
-    bpy.types.Scene.CoopLightmapImage = bpy.props.PointerProperty(name="LightmapImage", type=Image)
+    bpy.types.Scene.CoopLMImage    = bpy.props.PointerProperty(name="CoopLMImage", type=Image)
+    bpy.types.Scene.CoopAOImage    = bpy.props.PointerProperty(name="CoopAOImage", type=Image)
+    bpy.types.Scene.CoopAOStrength = bpy.props.FloatProperty(name="CoopAOStrength", default=0.75)
 
 
 def f3d_coop_unregister():
     for cls in reversed(f3d_coop_classes):
         unregister_class(cls)
 
-    del bpy.types.Scene.CoopLightmapImage
+    del bpy.types.Scene.CoopLMImage
+    del bpy.types.Scene.CoopAOImage
+    del bpy.types.Scene.CoopAOStrength
