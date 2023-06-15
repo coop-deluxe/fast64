@@ -14,6 +14,7 @@ def combine_lightmaps(lm_image, ao_image, ao_strength):
     width = lm_image.size[0]
     height = lm_image.size[1]
     combined_name = "lightmap"
+    ao_enabled = ao_strength > 0 and ao_image != None and ao_image.pixels != None
 
     # remove previous gamma corrected image
     for i in bpy.data.images:
@@ -24,13 +25,13 @@ def combine_lightmaps(lm_image, ao_image, ao_strength):
     # create gamma corrected image
     combined = bpy.data.images.new(combined_name, width, height)
     combined_pixels = list(lm_image.pixels)
-    if ao_image is not None:
+    if ao_enabled:
         ao_pixels = ao_image.pixels[:] # create a copy (tuple) for read-only access
     for x in range(width):
         for y in range(height):
             offs = (x + int(y * width)) * 4
             for i in range(3):
-                if ao_image is not None:
+                if ao_enabled:
                     val = (ao_pixels[offs + i] * combined_pixels[offs + i]) * ao_strength
                     val += combined_pixels[offs + i] * (1 - ao_strength)
                 else:
@@ -154,8 +155,13 @@ def convert_for_lightmap():
     # build up lightmap info
     lightmap_info = {
         'uv': uv_map_name,
-        'tex': lightmap
+        'tex': lightmap,
+        'material': 'sm64_lightmap_texture'
     }
+
+    if bpy.context.scene.CoopLMFog:
+        lightmap_info['material'] = 'sm64_lightmap_fog_texture'
+
     # convert the materials to F3D
     convertAllBSDFtoF3D([obj], False, lightmap_info = lightmap_info)
     # inject the uv map into the F3D material
@@ -203,6 +209,7 @@ class F3D_CoopPanel(bpy.types.Panel):
         prop_split(col, context.scene, "CoopLMImage", "Lightmap Image")
         prop_split(col, context.scene, "CoopAOImage", "Ambient Occlusion Image")
         prop_split(col, context.scene, "CoopAOStrength", "Ambient Occlusion Strength")
+        prop_split(col, context.scene, "CoopLMFog", "Fog")
         col.operator(F3D_Coop.bl_idname)
 
 f3d_coop_classes = (
@@ -217,6 +224,7 @@ def f3d_coop_register():
     bpy.types.Scene.CoopLMImage    = bpy.props.PointerProperty(name="CoopLMImage", type=Image)
     bpy.types.Scene.CoopAOImage    = bpy.props.PointerProperty(name="CoopAOImage", type=Image)
     bpy.types.Scene.CoopAOStrength = bpy.props.FloatProperty(name="CoopAOStrength", default=0.75)
+    bpy.types.Scene.CoopLMFog      = bpy.props.BoolProperty(name="CoopLMFog", default=0)
 
 
 def f3d_coop_unregister():
@@ -226,3 +234,4 @@ def f3d_coop_unregister():
     del bpy.types.Scene.CoopLMImage
     del bpy.types.Scene.CoopAOImage
     del bpy.types.Scene.CoopAOStrength
+    del bpy.types.Scene.CoopLMFog

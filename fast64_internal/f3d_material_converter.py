@@ -222,7 +222,7 @@ def convertBSDFtoF3D(obj, index, material, materialDict, lightmap_info = None):
                             + "' was not found in material preset enum list."
                         )
                 elif lightmap_info != None:
-                    presetName = getDefaultMaterialPreset("sm64_lightmap_texture")
+                    presetName = getDefaultMaterialPreset(lightmap_info['material'])
                 else:
                     presetName = getDefaultMaterialPreset("Shaded Texture")
                 newMaterial = createF3DMat(obj, preset=presetName, index=index, lightmap=(lightmap_info != None))

@@ -123,6 +123,7 @@ defaultMaterialPresets = {
     "Shaded Solid": {"SM64": "Shaded Solid", "OOT": "oot_shaded_solid"},
     "Shaded Texture": {"SM64": "Shaded Texture", "OOT": "oot_shaded_texture"},
     "sm64_lightmap_texture": {"SM64": "sm64_lightmap_texture", "OOT": "sm64_lightmap_texture"},
+    "sm64_lightmap_fog_texture": {"SM64": "sm64_lightmap_fog_texture", "OOT": "sm64_lightmap_fog_texture"},
 }
 
 
