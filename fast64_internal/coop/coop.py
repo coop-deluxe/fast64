@@ -13,7 +13,7 @@ def gamma_correct_value(val):
 def combine_lightmaps(lm_image, ao_image, ao_strength):
     width = lm_image.size[0]
     height = lm_image.size[1]
-    combined_name = "lightmap"
+    combined_name = "lightmap_" + bpy.context.active_object.name[0:8]
     ao_enabled = ao_strength > 0 and ao_image != None and ao_image.pixels != None
 
     # remove previous gamma corrected image
@@ -98,8 +98,6 @@ def convert_uv_to_col(obj, uv_map, col):
     mesh.update()
 
 def convert_for_lightmap():
-    lightmap = combine_lightmaps(bpy.context.scene.get("CoopLMImage"), bpy.context.scene.get("CoopAOImage"), bpy.context.scene.CoopAOStrength)
-
     # check object mode
     if bpy.context.mode != "OBJECT":
         raise PluginError("Operator can only be used in object mode.")
@@ -109,6 +107,8 @@ def convert_for_lightmap():
         raise PluginError("Mesh not selected.")
     elif type(bpy.context.selected_objects[0].data) is not bpy.types.Mesh:
         raise PluginError("Mesh not selected.")
+
+    lightmap = combine_lightmaps(bpy.context.scene.get("CoopLMImage"), bpy.context.scene.get("CoopAOImage"), bpy.context.scene.CoopAOStrength)
 
     # hide the selected object
     original_obj = bpy.context.active_object
