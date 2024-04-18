@@ -2884,6 +2884,13 @@ class SM64_ExportGeolayoutObject(ObjectDataExporter):
                     context.scene.geoCustomExport,
                     DLFormat.Static,
                 )
+
+                # Delete old *.bin if exists
+                if context.scene.geoCustomExport and context.scene.geoDeleteOldGeo:
+                    oldGeo = os.path.join(context.scene.geoExportPath, context.scene.geoStructName + ".bin")
+                    if os.path.exists(oldGeo):
+                        os.remove(oldGeo)
+
                 self.report({"INFO"}, "Success!")
             elif context.scene.fast64.sm64.exportType == "Insertable Binary":
                 exportGeolayoutObjectInsertableBinary(
@@ -3096,6 +3103,13 @@ class SM64_ExportGeolayoutArmature(bpy.types.Operator):
                     DLFormat.Static,
                 )
                 starSelectWarning(self, fileStatus)
+
+                # Delete old *.bin if exists
+                if context.scene.geoCustomExport and context.scene.geoDeleteOldGeo:
+                    oldGeo = os.path.join(context.scene.geoExportPath, context.scene.geoStructName + ".bin")
+                    if os.path.exists(oldGeo):
+                        os.remove(oldGeo)
+
                 self.report({"INFO"}, "Success!")
             elif context.scene.fast64.sm64.exportType == "Insertable Binary":
                 exportGeolayoutArmatureInsertableBinary(
@@ -3237,6 +3251,7 @@ class SM64_ExportGeolayoutPanel(SM64_Panel):
                 col.prop(context.scene, "geoExportPath")
                 prop_split(col, context.scene, "geoName", "Folder Name")
                 prop_split(col, context.scene, "geoStructName", "Geolayout Name")
+                prop_split(col, context.scene, "geoDeleteOldGeo", "Delete Old *.bin")
                 customExportWarning(col)
             else:
                 prop_split(col, context.scene, "geoExportHeaderType", "Export Type")
@@ -3400,6 +3415,7 @@ def sm64_geo_writer_register():
     )
     bpy.types.Scene.modifyOldGeo = bpy.props.BoolProperty(name="Rename old geolayout to avoid conflicts", default=True)
     bpy.types.Scene.geoStructName = bpy.props.StringProperty(name="Geolayout Name", default="mario_geo")
+    bpy.types.Scene.geoDeleteOldGeo = bpy.props.BoolProperty(name="Delete Old *.bin", default=True)
 
 
 def sm64_geo_writer_unregister():
@@ -3432,3 +3448,4 @@ def sm64_geo_writer_unregister():
     del bpy.types.Scene.replaceCapRefs
     del bpy.types.Scene.modifyOldGeo
     del bpy.types.Scene.geoStructName
+    del bpy.types.Scene.geoDeleteOldGeo

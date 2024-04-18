@@ -324,12 +324,12 @@ class LevelScript:
         for actorInclude in self.actorIncludes:
             result += actorInclude + "\n"
 
-        result += f"\n{self.get_persistent_block(PersistentBlocks.includes)}\n\n"
+        # result += f"\n{self.get_persistent_block(PersistentBlocks.includes)}\n\n"
 
         result += '#include "make_const_nonconst.h"\n'
         result += '#include "levels/' + self.name + '/header.h"\n\n'
 
-        result += f"{self.get_persistent_block(PersistentBlocks.scripts)}\n\n"
+        # result += f"{self.get_persistent_block(PersistentBlocks.scripts)}\n\n"
 
         result += "const LevelScript level_" + self.name + "_entry[] = {\n"
         result += "\tINIT_LEVEL(),\n"
@@ -343,7 +343,7 @@ class LevelScript:
             result += "\t" + macroToString(modelLoad, True) + "\n"
         result += "\n"
 
-        result += f"{self.get_persistent_block(PersistentBlocks.levelCommands, nTabs=1)}\n\n"
+        # result += f"{self.get_persistent_block(PersistentBlocks.levelCommands, nTabs=1)}\n\n"
 
         result += areaString
 
@@ -1191,6 +1191,12 @@ class SM64_ExportLevel(ObjectDataExporter):
                 DLFormat.Static,
             )
 
+            if context.scene.levelCustomExport and context.scene.levelDeleteOldLevel:
+                # Delete old *.lvl if exists
+                oldLevel = os.path.join(exportPath, f'level_{levelName}_entry.lvl')
+                if os.path.exists(oldLevel):
+                    os.remove(oldLevel)
+
             cameraWarning(self, fileStatus)
             starSelectWarning(self, fileStatus)
 
@@ -1230,6 +1236,7 @@ class SM64_ExportLevelPanel(SM64_Panel):
         if context.scene.levelCustomExport:
             prop_split(col, context.scene, "levelExportPath", "Directory")
             prop_split(col, context.scene, "levelName", "Name")
+            prop_split(col, context.scene, "levelDeleteOldLevel", "Delete Old *.lvl")
             customExportWarning(col)
         else:
             col.prop(context.scene, "levelOption")
@@ -1271,6 +1278,7 @@ def sm64_level_register():
     bpy.types.Scene.levelOption = bpy.props.EnumProperty(name="Level", items=enumLevelNames, default="bob")
     bpy.types.Scene.levelExportPath = bpy.props.StringProperty(name="Directory", subtype="FILE_PATH")
     bpy.types.Scene.levelCustomExport = bpy.props.BoolProperty(name="Custom Export Path")
+    bpy.types.Scene.levelDeleteOldLevel = bpy.props.BoolProperty(name="Delete Old *.lvl in Custom Export Path", default=True)
 
 
 def sm64_level_unregister():
@@ -1280,4 +1288,5 @@ def sm64_level_unregister():
     del bpy.types.Scene.levelName
     del bpy.types.Scene.levelExportPath
     del bpy.types.Scene.levelCustomExport
+    del bpy.types.Scene.levelDeleteOldLevel
     del bpy.types.Scene.levelOption

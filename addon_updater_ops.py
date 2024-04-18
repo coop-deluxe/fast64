@@ -1375,15 +1375,15 @@ def register(bl_info):
     updater.clear_state()  # Clear internal vars, avoids reloading oddities.
 
     # Originally:
-    # https://github.com/Fast-64/fast64
+    # https://github.com/djoslin0/fast64-coop-mods
     updater.engine = "Github"
-    updater.user = "djoslin0"
-    updater.repo = "fast64-coop-mods"
+    updater.user = "coop-deluxe"
+    updater.repo = "fast64"
 
     # updater.addon = # define at top of module, MUST be done first
 
     # Website for manual addon download, optional but recommended to set.
-    updater.website = "https://github.com/djoslin0/fast64-coop-mods"
+    updater.website = "https://github.com/coop-deluxe/fast64"
 
     # Used to check/compare versions.
     updater.current_version = bl_info["version"]
