@@ -534,6 +534,10 @@ class SM64_ExportCollision(bpy.types.Operator):
                 )
                 if not context.scene.colCustomExport:
                     applyBasicTweaks(exportPath)
+                else:
+                    oldCol = os.path.join(context.scene.colExportPath, bpy.context.scene.colName + "_collision.col")
+                    if os.path.exists(oldCol):
+                        os.remove(oldCol)
                 exportCollisionC(
                     obj,
                     finalTransform,
@@ -640,6 +644,7 @@ class SM64_ExportCollisionPanel(SM64_Panel):
             col.prop(context.scene, "colExportRooms")
             col.prop(context.scene, "colCustomExport")
             if context.scene.colCustomExport:
+                col.prop(context.scene, "colDeleteOldCol")
                 col.prop(context.scene, "colExportPath")
                 prop_split(col, context.scene, "colName", "Name")
                 customExportWarning(col)
@@ -710,6 +715,7 @@ def sm64_col_register():
     bpy.types.Scene.colExportRooms = bpy.props.BoolProperty(name="Export Rooms", default=False)
     bpy.types.Scene.colName = bpy.props.StringProperty(name="Name", default="mario")
     bpy.types.Scene.colCustomExport = bpy.props.BoolProperty(name="Custom Export Path")
+    bpy.types.Scene.colDeleteOldCol = bpy.props.BoolProperty(name="Delete Old *.col")
     bpy.types.Scene.colExportHeaderType = bpy.props.EnumProperty(
         items=enumExportHeaderType, name="Header Export", default="Actor"
     )
@@ -748,6 +754,7 @@ def sm64_col_unregister():
     del bpy.types.Scene.colExportRooms
     del bpy.types.Scene.colName
     del bpy.types.Scene.colCustomExport
+    del bpy.types.Scene.colDeleteOldCol
     del bpy.types.Scene.colExportHeaderType
     del bpy.types.Scene.colGroupName
     del bpy.types.Scene.colLevelName
