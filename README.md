@@ -2,11 +2,13 @@
 
 This requires Blender 3.2+.
 
-Forked from [kurethedead/fast64 on BitBucket](https://bitbucket.org/kurethedead/fast64/src).
+Forked from [djoslin0/fast64-coop-mods](https://github.com/djoslin0/fast64-coop-mods).
 
 ![alt-text](/images/mario_running.gif)
 
 This is a Blender plugin that allows one to export F3D display lists. It also has the ability to export assets for Super Mario 64 and Ocarina of Time decompilation projects. It supports custom color combiners / geometry modes / etc. It is also possible to use exported C code in homebrew applications.
+
+This fork of Fast64 is intended for the use of creating assets for sm64coopdx. It contains new features, such as disabling vertex integer rounding in case exact precision is needed, the option to delete generated DynOS files (.bin, .lvl) when exporting Geolayouts and levels respectively, a new scrolling texture menu when choosing the "Scrolling Texture Manager" behavior for an object, a fix for persistent blocks clearing on custom level export and an updated Mario blend by Agent X that fixes a glaring inaccuracy with the cap in hand states.
 
 Make sure to save often, as this plugin is prone to crashing when creating materials / undoing material creation. This is a Blender issue.
 
@@ -18,9 +20,6 @@ Make sure to save often, as this plugin is prone to crashing when creating mater
 ### Credits
 Thanks to anonymous_moose, Cheezepin, Rovert, and especially InTheBeef for testing.
 Thanks to InTheBeef for LowPolySkinnedMario.
-
-### Discord Server
-We have a Discord server for support as well as development [here](https://discord.gg/ny7PDcN2x8).
 
 ### Table of Contents
 1. [ Super Mario 64 ](/fast64_internal/sm64/README.md)
