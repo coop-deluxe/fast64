@@ -2015,7 +2015,10 @@ class Vtx:
         def spc(x):
             return "{" + ", ".join([str(a) for a in x]) + "}"
 
-        return "{{ " + ", ".join([spc(self.position), "0", spc(self.uv), spc(self.colorOrNormal)]) + " }}"
+        def hex(x):
+            return "{" + ", ".join(["{:#04x}".format(a).upper().replace("X", "x") for a in x]) + "}"
+
+        return "{{" + ", ".join([spc(self.position), "0", spc(self.uv), hex(self.colorOrNormal)]) + "}}"
 
 
 class VtxList:
