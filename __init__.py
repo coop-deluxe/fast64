@@ -172,7 +172,6 @@ class F3D_GlobalSettingsPanel(bpy.types.Panel):
         col.prop(context.scene, "ignoreTextureRestrictions")
         if context.scene.ignoreTextureRestrictions:
             col.box().label(text="Width/height must be < 1024. Must be png format.")
-        col.prop(context.scene, "vtxRound")
 
 
 class Fast64_GlobalObjectPanel(bpy.types.Panel):
@@ -470,7 +469,6 @@ def register():
 
     bpy.types.Scene.decomp_compatible = bpy.props.BoolProperty(name="Decomp Compatibility", default=True)
     bpy.types.Scene.ignoreTextureRestrictions = bpy.props.BoolProperty(name="Ignore Texture Restrictions")
-    bpy.types.Scene.vtxRound = bpy.props.BoolProperty(name="Round Vertices", default=True)
     bpy.types.Scene.fullTraceback = bpy.props.BoolProperty(name="Show Full Error Traceback", default=False)
     bpy.types.Scene.gameEditorMode = bpy.props.EnumProperty(
         name="Game", default="SM64", items=gameEditorEnum, update=gameEditorUpdate
@@ -510,7 +508,6 @@ def unregister():
     del bpy.types.Scene.fullTraceback
     del bpy.types.Scene.decomp_compatible
     del bpy.types.Scene.ignoreTextureRestrictions
-    del bpy.types.Scene.vtxRound
     del bpy.types.Scene.saveTextures
     del bpy.types.Scene.gameEditorMode
     del bpy.types.Scene.generateF3DNodeGraph

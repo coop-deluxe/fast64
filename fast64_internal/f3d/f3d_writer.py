@@ -1083,10 +1083,7 @@ def convertVertexData(
     tex_scale=(1, 1),
 ):
     # Position (8 bytes)
-    if bpy.context.scene.vtxRound:
-        position = [int(round(floatValue)) for floatValue in (transformMatrix @ loopPos)]
-    else:
-        position = [floatValue for floatValue in (transformMatrix @ loopPos)]
+    position = [int(round(floatValue)) for floatValue in (transformMatrix @ loopPos)
 
     # UV (4 bytes)
     # For F3D, Bilinear samples the point from the center of the pixel.
