@@ -122,6 +122,7 @@ enumF3DSource = [
 defaultMaterialPresets = {
     "Shaded Solid": {"SM64": "Shaded Solid", "OOT": "oot_shaded_solid"},
     "Shaded Texture": {"SM64": "Shaded Texture", "OOT": "oot_shaded_texture"},
+    "Vertex Colored Texture": {"SM64": "sm64_vertex_colored_texture", "OOT": "oot_vertex_colored_texture"},
     "sm64_lightmap_texture": {"SM64": "sm64_lightmap_texture", "OOT": "sm64_lightmap_texture"},
     "sm64_lightmap_fog_texture": {"SM64": "sm64_lightmap_fog_texture", "OOT": "sm64_lightmap_fog_texture"},
 }
@@ -418,6 +419,7 @@ def ui_geo_mode(settings, dataHolder, layout, useDropdown):
         inputGroup.prop(settings, "g_tex_gen_linear", text="Texture UV Generate Linear")
         inputGroup.prop(settings, "g_shade_smooth", text="Smooth Shading")
         inputGroup.prop(settings, "g_light_map", text="Light Map")
+        inputGroup.prop(settings, "g_lighting_engine", text="Lighting Engine")
         if bpy.context.scene.f3d_type == "F3DEX_GBI_2" or bpy.context.scene.f3d_type == "F3DEX_GBI":
             inputGroup.prop(settings, "g_clipping", text="Clipping")
 
@@ -2599,6 +2601,12 @@ class RDPSettings(bpy.types.PropertyGroup):
         update=update_node_values_with_preset,
         description="Uses vertex colors as a light map"
     )
+    g_lighting_engine: bpy.props.BoolProperty(
+        name="Lighting Engine",
+        default=False,
+        update=update_node_values_with_preset,
+        description="Uses vertex colors for lighting (incompatible with lightmaps)"
+    )
     # f3dlx2 only
     g_clipping: bpy.props.BoolProperty(
         name="Clipping",
@@ -2852,6 +2860,7 @@ class RDPSettings(bpy.types.PropertyGroup):
             self.g_tex_gen_linear,
             self.g_shade_smooth,
             self.g_light_map,
+            self.g_lighting_engine,
             self.g_clipping,
             self.g_mdsft_alpha_dither,
             self.g_mdsft_rgb_dither,

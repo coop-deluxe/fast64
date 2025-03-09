@@ -1534,6 +1534,7 @@ def saveGeoModeDefinitionF3DEX2(fMaterial, settings, defaults, matWriteMethod):
     saveBitGeoF3DEX2(settings.g_fog, defaults.g_fog, "G_FOG", geo, matWriteMethod)
     saveBitGeoF3DEX2(settings.g_lighting, defaults.g_lighting, "G_LIGHTING", geo, matWriteMethod)
     saveBitGeoF3DEX2(settings.g_light_map, defaults.g_light_map, "G_LIGHT_MAP_EXT", geo, matWriteMethod)
+    saveBitGeoF3dEX2(settings.g_lighting_engine, defaults.g_lighting_engine, "G_LIGHTING_ENGINE_EXT", geo, matWriteMethod)
 
     # make sure normals are saved correctly.
     saveBitGeoF3DEX2(settings.g_tex_gen, defaults.g_tex_gen, "G_TEXTURE_GEN", geo, matWriteMethod)
@@ -1573,6 +1574,7 @@ def saveGeoModeDefinition(fMaterial, settings, defaults, matWriteMethod):
     saveBitGeo(settings.g_fog, defaults.g_fog, "G_FOG", setGeo, clearGeo, matWriteMethod)
     saveBitGeo(settings.g_lighting, defaults.g_lighting, "G_LIGHTING", setGeo, clearGeo, matWriteMethod)
     saveBitGeo(settings.g_light_map, defaults.g_light_map, "G_LIGHT_MAP_EXT", setGeo, clearGeo, matWriteMethod)
+    saveBitGeo(settings.g_lighting_engine, defaults.g_lighting_engine, "G_LIGHTING_ENGINE_EXT", setGeo, clearGeo, matWriteMethod)
 
     # make sure normals are saved correctly.
     saveBitGeo(settings.g_tex_gen, defaults.g_tex_gen, "G_TEXTURE_GEN", setGeo, clearGeo, matWriteMethod)
