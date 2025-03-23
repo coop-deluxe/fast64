@@ -51581,6 +51581,8 @@ func_map = {
         "007d1d80": "_behaviorSegmentRomEnd",
         "8016f000": "_goddardSegmentStart",
         "007cc6c0": "_goddardSegmentRomStart",
-        "Scroll":   "RM_Scroll_Texture"
+        "Scroll":   "RM_Scroll_Texture",
+        "Ambient":  "bhvAmbientLight",
+        "Point":    "bhvPointLight"
     },
 }
